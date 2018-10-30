@@ -1,0 +1,277 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace GameDuoiHinhBatChu
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        string[] listHinhAnh;
+
+        string[] listDapAn =
+        {
+            "AIMO",
+            "ANHHAO",
+            "ANMAY",
+            "AOMUA",
+            "APGIA",
+            "AUYEM"
+        };
+
+        int index; //So thu tu cua cac tam hinh
+
+        int[] listIndex;    //list nhung index da dung
+
+        int usedIndex = 0;  //So index da dung - so tam hinh da dung
+
+        Button[] ButtonDapAn; //tao 1 chuoi Button chua cac ki tu dap an
+
+        Button[] ButtonGoiY;    //tao 1 chuoi Button chua cac ki tu goi y
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            listHinhAnh = new string[6];    //chuỗi hình ảnh tương đương số hình
+
+            for (int i = 1; i <= listHinhAnh.Length; ++i)
+            {
+                listHinhAnh[i - 1] = "dhbc/" + i + ".jpg";
+            }
+
+            listIndex = new int[listHinhAnh.Length];
+
+            Random rd = new Random();
+            index = rd.Next(0, listHinhAnh.Length); //random hình
+
+            listIndex[usedIndex] = index;   //add index đã dùng vào chuỗi
+
+            ptrHinhAnh.BackgroundImage = Image.FromFile(listHinhAnh[index]);    //hiển thị
+            ptrHinhAnh.BackgroundImageLayout = ImageLayout.Stretch;
+
+            int soButtonDapAn = listDapAn[index].Length;
+
+            Function_PhatSinhButtonDapAn(soButtonDapAn);
+            Function_PhatSinhButtonGoiY(soButtonDapAn);
+
+        }
+        //Phat sinh cac Button trong de dien cau tra loi
+        private void Function_PhatSinhButtonDapAn(int soButtonDapAn)
+        {
+            ButtonDapAn = new Button[soButtonDapAn];
+
+            for (int i = 0; i < soButtonDapAn; i++)
+            {
+                ButtonDapAn[i] = new Button();
+                if (i == 0)
+                ButtonDapAn[i].Location = new Point(ptrHinhAnh.Location.X, ptrHinhAnh.Size.Height + ptrHinhAnh.Location.Y + 20);
+                else
+                ButtonDapAn[i].Location = new Point(ButtonDapAn[i - 1].Location.X + ButtonDapAn[i - 1].Size.Width + 10, ButtonDapAn[i - 1].Location.Y);
+                ButtonDapAn[i].Size = new Size(35, 35);
+                ButtonDapAn[i].Click += Click_Button_DapAn;
+                this.Controls.Add(ButtonDapAn[i]);
+            }
+        }
+        //Phat sinh cac Button chua cac ki tu ngau nhien
+        private void Function_PhatSinhButtonGoiY(int soButtonDapAn)
+        {
+            ButtonGoiY = new Button[(soButtonDapAn + 5)]; //Tao so luong button gap 2 lan so o dap an
+
+            for (int i = 0; i < (soButtonDapAn +5); i++)
+            {
+                ButtonGoiY[i] = new Button();
+                ButtonGoiY[i].Size = new Size(40, 30);
+                if      (i == 0)
+                ButtonGoiY[i].Location = new Point(ptrHinhAnh.Location.X + ptrHinhAnh.Size.Width + 30, ptrHinhAnh.Location.Y);
+                else if (i == 1)
+                ButtonGoiY[i].Location = new Point(ButtonGoiY[0].Location.X + ButtonGoiY[0].Size.Width + 10, ButtonGoiY[0].Location.Y);
+                else
+                ButtonGoiY[i].Location = new Point(ButtonGoiY[i - 2].Location.X, ButtonGoiY[i - 2].Location.Y + 40);
+                ButtonGoiY[i].Click += Click_Button_GoiY;
+                this.Controls.Add(ButtonGoiY[i]);
+            }
+
+            Function_PhatsinhGoiYDapAn();
+        }
+        //Random va dien cac ky tu vao ButtonGoiY
+        private void Function_PhatsinhGoiYDapAn()
+        {
+            char[] ListDapAnGoiY = new char[ButtonGoiY.Length];
+            //Xep cac ki tu dap an vao chuoi
+            for (int i = 0; i < ButtonDapAn.Length; i++)
+            {
+                ListDapAnGoiY[i] = listDapAn[index][i];
+            }
+
+            Random rd = new Random();
+
+            //Phat sinh ngau nhien cac ky tu khac vao chuoi
+            for (int i = ButtonDapAn.Length; i < ButtonGoiY.Length; i++)
+            {
+                do
+                {
+                    ListDapAnGoiY[i] = (char)rd.Next(65, 91); //random ki tu tu A->Z (theo bang ma ASCII)
+                }
+                while (ListDapAnGoiY[i] == 'F' || ListDapAnGoiY[i] == 'W' || ListDapAnGoiY[i] == 'Z' || ListDapAnGoiY[i] == 'J');
+            }
+
+
+            int[] listIndex1 = new int[ListDapAnGoiY.Length];    //list nhung index da dung
+            int usedIndex1 = 0;
+            //Tron lan va ghi vao Button
+            for (int i = 0; i < ListDapAnGoiY.Length; i++)
+            {
+                bool check1;
+                do
+                {
+
+                    int index1 = rd.Next(0, ButtonGoiY.Length);
+                    check1 = true;
+
+                    for (int j = 0; j < usedIndex1; j++)
+                    {
+                        if (index1 == listIndex1[j])
+                        {
+                            check1 = false;
+                            break;
+                        }
+                    }
+                    if (check1 == true)
+                    {
+                        //Hien thi Ki Tu vao Button
+                        ButtonGoiY[i].Text = ListDapAnGoiY[index1].ToString();
+                        listIndex1[usedIndex1++] = index1; //add index da dung vao array 
+                    }
+                } while (!check1);
+            }
+        }
+        //Event Click Button Dap An
+        private void Click_Button_DapAn(object sender, EventArgs e)
+        {
+            foreach (Button btn in ButtonGoiY)
+            {
+                if (btn.Visible == false && btn.Text == ((Button)sender).Text)
+                {
+                    btn.Visible = true;
+                    break;
+                }
+            }
+
+            ((Button)sender).Text = "";
+
+        }
+        //Event Click Button Goi Y
+        private void Click_Button_GoiY(object sender, EventArgs e)
+        {
+
+            for (int i = 0; i < ButtonDapAn.Length; ++i)
+            {
+                if (ButtonDapAn[i].Text == "")
+                {
+                    ButtonDapAn[i].Text = ((Button)sender).Text;
+                    ((Button)sender).Visible = false; //Sau khi nhan Button thi Button do bien mat
+                    break;
+                }
+            }
+            bool check = false;
+            foreach (Button txt in ButtonDapAn)
+            {
+                if (txt.Text == "")
+                {
+                    check = true;   //check == true - tuc la con o textbox trong
+                    break;
+                }
+            }
+            if (check == false) //check = false - khong con o trong
+            {
+                string s = ""; //tao 1 string ket noi cac ky tu trong textbox
+
+                for (int i = 0; i < ButtonDapAn.Length; ++i)//Ket noi cac ki tu trong textbox thanh string
+                {
+                    s += ButtonDapAn[i].Text;
+                }
+
+                if (s == listDapAn[index])
+                {
+                    MessageBox.Show("You won");
+                    Function_ChuyenQuaCauTiepTheo();
+                }
+                else MessageBox.Show("Wrong");
+            }
+        }
+        //Event Skip
+        private void Skip_Click(object sender, EventArgs e)
+        {
+            Function_ChuyenQuaCauTiepTheo();
+        }
+        //Chuyen qua cau tiep theo khi tra loi dung hoac skip
+        private void Function_ChuyenQuaCauTiepTheo()
+        {
+            bool check;
+
+            do
+            {
+                //Sau khi random het tat ca hinh thi chien thang
+                if (usedIndex == listIndex.Length - 1)
+                {
+                    MessageBox.Show("Ban da vuot qua tat ca man choi");
+                    this.Close();
+                    break;
+                }
+
+                Random rd = new Random();
+                index = rd.Next(0, listHinhAnh.Length);
+
+                check = true;
+
+                for (int i = 0; i <= usedIndex; i++)
+                {
+                    if (listIndex[i] == index) //Neu trung
+                    {
+                        check = false;
+                        break;
+                    }
+                }
+
+                //Neu khong trung thi hien thi len hinh
+                if (check == true)
+                {
+                    ptrHinhAnh.BackgroundImage = Image.FromFile(listHinhAnh[index]);
+                    ptrHinhAnh.BackgroundImageLayout = ImageLayout.Stretch;
+
+                    listIndex[++usedIndex] = index; //Luu nhung index da dung vao mang
+
+                    //Xoa cac text box truoc do
+                    foreach (Button text in ButtonDapAn)
+                    {
+                        this.Controls.Remove(text);
+                    }
+
+                    //Phat sinh cac o textbox dap an
+                    int soButtonDapAn = listDapAn[index].Length;
+                    Function_PhatSinhButtonDapAn(soButtonDapAn);
+
+                    //Xoa cac o dap an truoc do
+                    foreach (Button btn in ButtonGoiY)
+                    {
+                        this.Controls.Remove(btn);
+                    }
+
+                    //Phat sinh tu dong cac goi y dap an
+                    Function_PhatSinhButtonGoiY(soButtonDapAn);
+                }
+
+            } while (check == false);
+
+
+        }
+    }
+}
